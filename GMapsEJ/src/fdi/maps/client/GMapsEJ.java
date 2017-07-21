@@ -52,42 +52,52 @@ public class GMapsEJ implements EntryPoint {
 
         gMap.addDblClickListener(new DblClickHandler() {
 			
+        	
+        	
+
 			@Override
 			public void handle(MouseEvent event) {
 //				Window.alert(event.getLatLng().toString());
 //		        MarkerImage markerImage = MarkerImage.create();
 				
-				
-				
-				
-		        MarkerOptions mOpts = MarkerOptions.create();
-//		        mOpts.setIcon(markerImage);
-		        mOpts.setPosition(event.getLatLng());
-		        
-		        Marker marker = Marker.create(mOpts);
-		        marker.setTitle("Direccion");
-		        marker.setMap(gMap);
-		        
-		        listaMarked.add(marker);
-		        L.addItem("Marca->"+event.getLatLng().toString());
-		        marker.addDblClickListener(new Marker.DblClickHandler() {
+				GeocoderRequest GReq = GeocoderRequest.create();
+				GReq.setLocation(event.getLatLng());
+				fCoder.geocode(GReq, new Geocoder.Callback() {
 					
+					
+					
+					private Marker marker;
+					private int Position;
+
 					@Override
-					public void handle(MouseEvent event) {
-						GeocoderRequest GReq = GeocoderRequest.create();
-						GReq.setLocation(event.getLatLng());
-						fCoder.geocode(GReq, new Geocoder.Callback() {
-							
-							@Override
-							public void handle(JsArray<GeocoderResult> a, GeocoderStatus b) {
-								GeocoderResult result = a.shift();
-								Window.alert(result.getFormattedAddress());
+					public void handle(JsArray<GeocoderResult> a, GeocoderStatus b) {
+						GeocoderResult result = a.shift();
+//						Window.alert(result.getFormattedAddress());
+						 MarkerOptions mOpts = MarkerOptions.create();
+//					        mOpts.setIcon(markerImage);
+					        mOpts.setPosition(event.getLatLng());
+					        
+					        marker = Marker.create(mOpts);
+					        marker.setTitle(result.getFormattedAddress());
+					        marker.setMap(gMap);
+					        
+					        listaMarked.add(marker);
+					        L.addItem(result.getFormattedAddress());
+					        Position=L.getItemCount()-1;
+					        marker.addDblClickListener(new Marker.DblClickHandler() {
 								
-							}
-						});
-						
+								@Override
+								public void handle(MouseEvent event) {
+									
+									BorrarPunto(marker,Position);
+
+								}
+							});
 					}
 				});
+				
+				
+		       
 				
 			}
 		});
@@ -110,18 +120,17 @@ public class GMapsEJ implements EntryPoint {
 //        });
         fCoder = Geocoder.create();
         L=new ListBox();
+        L.setVisibleItemCount(5);
         L.addClickHandler(new ClickHandler() {
 			
 			@Override
 			public void onClick(ClickEvent event) {
-				int Selecctioado = L.getSelectedIndex();
+				int Selecctioado = L.getSelectedIndex()-1;
 				if (!listaMarked.isEmpty())
 					{
+					
 					Marker Marked=listaMarked.get(Selecctioado);
-					GoogleMap Nulo=null;
-					Marked.setMap(Nulo);
-					L.removeItem(Selecctioado);
-					listaMarked.remove(Selecctioado);
+					BorrarPunto(Marked,Selecctioado);
 					}
 				
 			}
@@ -129,6 +138,18 @@ public class GMapsEJ implements EntryPoint {
         
         RootPanel.get("centered").add(L);
 
+	}
+
+	protected void BorrarPunto(Marker Marked, int Selecctioado) {
+		
+		if (Window.confirm("Esta seguro de que desea borrar el punto"))
+		{
+		GoogleMap Nulo=null;
+		Marked.setMap(Nulo);
+		L.removeItem(Selecctioado);
+		listaMarked.remove(Selecctioado);
+		}
+		
 	}
 	
 	
