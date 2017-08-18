@@ -7,10 +7,16 @@ import com.google.gwt.core.client.JsArray;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.google.maps.gwt.client.DirectionsRenderer;
+import com.google.maps.gwt.client.DirectionsRendererOptions;
+import com.google.maps.gwt.client.DirectionsRequest;
+import com.google.maps.gwt.client.DirectionsResult;
+import com.google.maps.gwt.client.DirectionsService;
+import com.google.maps.gwt.client.DirectionsStatus;
+import com.google.maps.gwt.client.DirectionsWaypoint;
 import com.google.maps.gwt.client.Geocoder;
 import com.google.maps.gwt.client.GeocoderRequest;
 import com.google.maps.gwt.client.GeocoderResult;
@@ -136,8 +142,87 @@ public class GMapsEJ implements EntryPoint {
 			}
 		});
         
+        
+        
+        
+        
+        
+        
         RootPanel.get("centered").add(L);
+        
+        
+        FormPanel panel2 = new FormPanel();
+        panel.setWidth("100%");
+        panel.setHeight("600px");
+        MapOptions options3 = MapOptions.create();
+        options3.setCenter(LatLng.create(40.4169,-3.7033));
+        options3.setZoom(13);
+        options3.setMapTypeId(MapTypeId.ROADMAP);
+        options3.setDraggable(true);
+        options3.setMapTypeControl(true);
+        options3.setScaleControl(true);
+        options3.setScrollwheel(true);
+        options3.setMapMaker(true);
+//        Button btn = new Button();
+        GoogleMap gMap2 = GoogleMap.create(panel2.getElement(), options3);
+        RootPanel.get("centered").add(panel2);
+//      
+        
+        
+        
+        DirectionsRendererOptions options2 = DirectionsRendererOptions.create();
+        final DirectionsRenderer directionsDisplay = DirectionsRenderer.create(options2);
+        directionsDisplay.setMap(gMap2);
+        
+        DirectionsRequest DR = DirectionsRequest.create();
+        DR.setOrigin(LatLng.create(40.4169,-3.7033));
+        DR.setDestination(LatLng.create(37.8550964,-4.7086738));
+        
+        DirectionsWaypoint DW=DirectionsWaypoint.create();
+        
+        DW.setLocation(LatLng.create(39.8676536,-4.0098788));
+        DW.setStopover(true);
 
+        DirectionsWaypoint DW2=DirectionsWaypoint.create();
+        
+        DW2.setLocation(LatLng.create(38.9554156,-3.9809874));
+        DW2.setStopover(true);
+        
+        JsArray<DirectionsWaypoint> waypoints = JsArray.createArray().cast();
+        waypoints.push(DW);
+        waypoints.push(DW2);
+        
+        
+        DR.setWaypoints(waypoints);
+        
+        DirectionsService DS=DirectionsService.create();
+        
+        DS.route(DR, new DirectionsService.Callback() {
+			
+			@Override
+			public void handle(DirectionsResult result, DirectionsStatus status) {
+				if (status == DirectionsStatus.OK) {
+			          directionsDisplay.setDirections(result);
+			        } else if (status == DirectionsStatus.INVALID_REQUEST) {
+
+			        } else if (status == DirectionsStatus.MAX_WAYPOINTS_EXCEEDED) {
+
+			        } else if (status == DirectionsStatus.NOT_FOUND) {
+
+			        } else if (status == DirectionsStatus.OVER_QUERY_LIMIT) {
+
+			        } else if (status == DirectionsStatus.REQUEST_DENIED) {
+
+			        } else if (status == DirectionsStatus.UNKNOWN_ERROR) {
+
+			        } else if (status == DirectionsStatus.ZERO_RESULTS) {
+
+			        }
+				
+			}
+		});
+  
+        
 	}
 
 	protected void BorrarPunto(Marker Marked, int Selecctioado) {
@@ -195,5 +280,8 @@ public class GMapsEJ implements EntryPoint {
 //            public void onFailure(int statusCode) {}
 //        });
 //    }
+	
+	
+	
 
 }
