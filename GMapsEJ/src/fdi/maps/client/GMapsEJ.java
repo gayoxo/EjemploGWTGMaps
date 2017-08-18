@@ -30,12 +30,14 @@ import com.google.maps.gwt.client.Marker;
 //import com.google.maps.gwt.client.MarkerImage;
 import com.google.maps.gwt.client.MarkerOptions;
 import com.google.maps.gwt.client.MouseEvent;
+import com.google.maps.gwt.client.TravelMode;
 
 
 public class GMapsEJ implements EntryPoint {
 	private ListBox L;
 	LinkedList<Marker> listaMarked;
 	private Geocoder fCoder;
+	private GoogleMap gMap;
 
 	public void onModuleLoad() {
 		listaMarked=new LinkedList<>();
@@ -52,7 +54,7 @@ public class GMapsEJ implements EntryPoint {
         options.setScrollwheel(true);
         options.setMapMaker(true);
 //        Button btn = new Button();
-        GoogleMap gMap = GoogleMap.create(panel.getElement(), options);
+        gMap = GoogleMap.create(panel.getElement(), options);
         RootPanel.get("centered").add(panel);
 //        RootPanel.get("centered").add(btn);
 
@@ -81,7 +83,7 @@ public class GMapsEJ implements EntryPoint {
 //						Window.alert(result.getFormattedAddress());
 						 MarkerOptions mOpts = MarkerOptions.create();
 //					        mOpts.setIcon(markerImage);
-					        mOpts.setPosition(event.getLatLng());
+					        mOpts.setPosition(result.getGeometry().getLocation());
 					        
 					        marker = Marker.create(mOpts);
 					        marker.setTitle(result.getFormattedAddress());
@@ -152,8 +154,8 @@ public class GMapsEJ implements EntryPoint {
         
         
         FormPanel panel2 = new FormPanel();
-        panel.setWidth("100%");
-        panel.setHeight("600px");
+        panel2.setWidth("100%");
+        panel2.setHeight("600px");
         MapOptions options3 = MapOptions.create();
         options3.setCenter(LatLng.create(40.4169,-3.7033));
         options3.setZoom(13);
@@ -177,6 +179,7 @@ public class GMapsEJ implements EntryPoint {
         DirectionsRequest DR = DirectionsRequest.create();
         DR.setOrigin(LatLng.create(40.4169,-3.7033));
         DR.setDestination(LatLng.create(37.8550964,-4.7086738));
+        DR.setTravelMode(TravelMode.WALKING);
         
         DirectionsWaypoint DW=DirectionsWaypoint.create();
         
@@ -204,19 +207,19 @@ public class GMapsEJ implements EntryPoint {
 				if (status == DirectionsStatus.OK) {
 			          directionsDisplay.setDirections(result);
 			        } else if (status == DirectionsStatus.INVALID_REQUEST) {
-
+			        	Window.alert(status.toString());
 			        } else if (status == DirectionsStatus.MAX_WAYPOINTS_EXCEEDED) {
-
+			        	Window.alert(status.toString());
 			        } else if (status == DirectionsStatus.NOT_FOUND) {
-
+			        	Window.alert(status.toString());
 			        } else if (status == DirectionsStatus.OVER_QUERY_LIMIT) {
-
+			        	Window.alert(status.toString());
 			        } else if (status == DirectionsStatus.REQUEST_DENIED) {
-
+			        	Window.alert(status.toString());
 			        } else if (status == DirectionsStatus.UNKNOWN_ERROR) {
-
+			        	Window.alert(status.toString());
 			        } else if (status == DirectionsStatus.ZERO_RESULTS) {
-
+			        	Window.alert(status.toString());
 			        }
 				
 			}
