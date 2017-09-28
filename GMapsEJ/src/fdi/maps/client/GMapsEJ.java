@@ -6,117 +6,117 @@ import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.maps.client.MapOptions;
+import com.google.gwt.maps.client.MapTypeId;
+import com.google.gwt.maps.client.MapWidget;
+import com.google.gwt.maps.client.base.LatLng;
+import com.google.gwt.maps.client.events.dblclick.DblClickMapEvent;
+import com.google.gwt.maps.client.events.dblclick.DblClickMapHandler;
+import com.google.gwt.maps.client.overlays.Marker;
+import com.google.gwt.maps.client.overlays.MarkerOptions;
+import com.google.gwt.maps.client.services.DirectionsRenderer;
+import com.google.gwt.maps.client.services.DirectionsRendererOptions;
+import com.google.gwt.maps.client.services.DirectionsRequest;
+import com.google.gwt.maps.client.services.DirectionsResult;
+import com.google.gwt.maps.client.services.DirectionsResultHandler;
+import com.google.gwt.maps.client.services.DirectionsService;
+import com.google.gwt.maps.client.services.DirectionsStatus;
+import com.google.gwt.maps.client.services.DirectionsWaypoint;
+import com.google.gwt.maps.client.services.Geocoder;
+import com.google.gwt.maps.client.services.GeocoderRequest;
+import com.google.gwt.maps.client.services.GeocoderRequestHandler;
+import com.google.gwt.maps.client.services.GeocoderResult;
+import com.google.gwt.maps.client.services.GeocoderStatus;
+import com.google.gwt.maps.client.services.TravelMode;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RootPanel;
-import com.google.maps.gwt.client.DirectionsRenderer;
-import com.google.maps.gwt.client.DirectionsRendererOptions;
-import com.google.maps.gwt.client.DirectionsRequest;
-import com.google.maps.gwt.client.DirectionsResult;
-import com.google.maps.gwt.client.DirectionsService;
-import com.google.maps.gwt.client.DirectionsStatus;
-import com.google.maps.gwt.client.DirectionsWaypoint;
-import com.google.maps.gwt.client.Geocoder;
-import com.google.maps.gwt.client.GeocoderRequest;
-import com.google.maps.gwt.client.GeocoderResult;
-import com.google.maps.gwt.client.GeocoderStatus;
-import com.google.maps.gwt.client.GoogleMap;
-import com.google.maps.gwt.client.GoogleMap.DblClickHandler;
-import com.google.maps.gwt.client.LatLng;
-import com.google.maps.gwt.client.MapOptions;
-import com.google.maps.gwt.client.MapTypeId;
-import com.google.maps.gwt.client.Marker;
-//import com.google.maps.gwt.client.MarkerImage;
-import com.google.maps.gwt.client.MarkerOptions;
-import com.google.maps.gwt.client.MouseEvent;
-import com.google.maps.gwt.client.TravelMode;
+
 
 
 public class GMapsEJ implements EntryPoint {
 	private ListBox L;
 	LinkedList<Marker> listaMarked;
 	private Geocoder fCoder;
-	private GoogleMap gMap;
+	private MapWidget gMap;
 
 	public void onModuleLoad() {
 		listaMarked=new LinkedList<>();
 		FormPanel panel = new FormPanel();
         panel.setWidth("100%");
         panel.setHeight("600px");
-        MapOptions options = MapOptions.create();
-        options.setCenter(LatLng.create(40.4169,-3.7033));
+        MapOptions options = MapOptions.newInstance();
+        options.setCenter(LatLng.newInstance(40.4169,-3.7033));
         options.setZoom(13);
         options.setMapTypeId(MapTypeId.ROADMAP);
         options.setDraggable(true);
         options.setMapTypeControl(true);
         options.setScaleControl(true);
-        options.setScrollwheel(true);
+        options.setScrollWheel(true);
         options.setMapMaker(true);
 //        Button btn = new Button();
-        gMap = GoogleMap.create(panel.getElement(), options);
+        gMap = new MapWidget(options);
+        panel.add(gMap);
         RootPanel.get("centered").add(panel);
 //        RootPanel.get("centered").add(btn);
 
-        gMap.addDblClickListener(new DblClickHandler() {
+        gMap.addDblClickHandler(new DblClickMapHandler() {
 			
         	
         	
 
+
 			@Override
-			public void handle(MouseEvent event) {
-//				Window.alert(event.getLatLng().toString());
-//		        MarkerImage markerImage = MarkerImage.create();
-				
-				GeocoderRequest GReq = GeocoderRequest.create();
-				GReq.setLocation(event.getLatLng());
-				fCoder.geocode(GReq, new Geocoder.Callback() {
+			public void onEvent(DblClickMapEvent event) {
+				GeocoderRequest GReq = GeocoderRequest.newInstance();
+				GReq.setLocation(event.getMouseEvent().getLatLng());
+				fCoder.geocode(GReq, new GeocoderRequestHandler() {
 					
 					
 					
 					private Marker marker;
 					private int Position;
 
+
 					@Override
-					public void handle(JsArray<GeocoderResult> a, GeocoderStatus b) {
-						GeocoderResult result = a.shift();
+					public void onCallback(JsArray<GeocoderResult> results, GeocoderStatus status) {
+						GeocoderResult result = results.shift();
 //						Window.alert(result.getFormattedAddress());
-						 MarkerOptions mOpts = MarkerOptions.create();
+						 MarkerOptions mOpts = MarkerOptions.newInstance();
 //					        mOpts.setIcon(markerImage);
 					        mOpts.setPosition(result.getGeometry().getLocation());
 					        
-					        marker = Marker.create(mOpts);
-					        marker.setTitle(result.getFormattedAddress());
+					        marker = Marker.newInstance(mOpts);
+					        marker.setTitle(result.getFormatted_Address());
 					        marker.setMap(gMap);
 					        
 					        listaMarked.add(marker);
-					        L.addItem(result.getFormattedAddress());
+					        L.addItem(result.getFormatted_Address());
 					        Position=L.getItemCount()-1;
-					        marker.addDblClickListener(new Marker.DblClickHandler() {
+					        marker.addDblClickHandler(new DblClickMapHandler() {
 								
 								@Override
-								public void handle(MouseEvent event) {
-									
+								public void onEvent(DblClickMapEvent event) {
 									BorrarPunto(marker,Position);
-
+									
 								}
 							});
+
+						
 					}
 				});
-				
-				
-		       
 				
 			}
 		});
         
-        LatLng centerIcon = LatLng.create(40.4169,-3.7033);
+        LatLng centerIcon = LatLng.newInstance(40.4169,-3.7033);
 //        MarkerImage markerImage = MarkerImage.create();
-        MarkerOptions mOpts = MarkerOptions.create();
+        MarkerOptions mOpts = MarkerOptions.newInstance();
 //        mOpts.setIcon(markerImage);
         mOpts.setPosition(centerIcon);
         
-        Marker marker = Marker.create(mOpts);
+        Marker marker = Marker.newInstance(mOpts);
         marker.setMap(gMap);
         
 //        gMap.addIdleListener(new GoogleMap.IdleHandler() {
@@ -126,7 +126,7 @@ public class GMapsEJ implements EntryPoint {
 //
 //            }
 //        });
-        fCoder = Geocoder.create();
+        fCoder = Geocoder.newInstance();
         L=new ListBox();
         L.setVisibleItemCount(5);
         L.addClickHandler(new ClickHandler() {
@@ -156,40 +156,41 @@ public class GMapsEJ implements EntryPoint {
         FormPanel panel2 = new FormPanel();
         panel2.setWidth("100%");
         panel2.setHeight("600px");
-        MapOptions options3 = MapOptions.create();
-        options3.setCenter(LatLng.create(40.4169,-3.7033));
+        MapOptions options3 = MapOptions.newInstance();
+        options3.setCenter(LatLng.newInstance(40.4169,-3.7033));
         options3.setZoom(13);
         options3.setMapTypeId(MapTypeId.ROADMAP);
         options3.setDraggable(true);
         options3.setMapTypeControl(true);
         options3.setScaleControl(true);
-        options3.setScrollwheel(true);
+        options3.setScrollWheel(true);
         options3.setMapMaker(true);
 //        Button btn = new Button();
-        GoogleMap gMap2 = GoogleMap.create(panel2.getElement(), options3);
+        MapWidget gMap2 = new MapWidget(options3);
+        panel2.add(gMap2);
         RootPanel.get("centered").add(panel2);
 //      
         
         
         
-        DirectionsRendererOptions options2 = DirectionsRendererOptions.create();
-        final DirectionsRenderer directionsDisplay = DirectionsRenderer.create(options2);
+        DirectionsRendererOptions options2 = DirectionsRendererOptions.newInstance();
+        final DirectionsRenderer directionsDisplay = DirectionsRenderer.newInstance(options2);
         directionsDisplay.setMap(gMap2);
         
-        DirectionsRequest DR = DirectionsRequest.create();
-        DR.setOrigin(LatLng.create(40.4169,-3.7033));
-        DR.setDestination(LatLng.create(37.8550964,-4.7086738));
+        DirectionsRequest DR = DirectionsRequest.newInstance();
+        DR.setOrigin(LatLng.newInstance(40.4169,-3.7033));
+        DR.setDestination(LatLng.newInstance(37.8550964,-4.7086738));
         DR.setTravelMode(TravelMode.WALKING);
         
-        DirectionsWaypoint DW=DirectionsWaypoint.create();
+        DirectionsWaypoint DW=DirectionsWaypoint.newInstance();
         
-        DW.setLocation(LatLng.create(39.8676536,-4.0098788));
-        DW.setStopover(true);
+        DW.setLocation(LatLng.newInstance(39.8676536,-4.0098788));
+        DW.setStopOver(true);
 
-        DirectionsWaypoint DW2=DirectionsWaypoint.create();
+        DirectionsWaypoint DW2=DirectionsWaypoint.newInstance();
         
-        DW2.setLocation(LatLng.create(38.9554156,-3.9809874));
-        DW2.setStopover(true);
+        DW2.setLocation(LatLng.newInstance(38.9554156,-3.9809874));
+        DW2.setStopOver(true);
         
         JsArray<DirectionsWaypoint> waypoints = JsArray.createArray().cast();
         waypoints.push(DW);
@@ -198,12 +199,13 @@ public class GMapsEJ implements EntryPoint {
         
         DR.setWaypoints(waypoints);
         
-        DirectionsService DS=DirectionsService.create();
+        DirectionsService DS=DirectionsService.newInstance();
         
-        DS.route(DR, new DirectionsService.Callback() {
+        DS.route(DR, new DirectionsResultHandler() {
 			
+
 			@Override
-			public void handle(DirectionsResult result, DirectionsStatus status) {
+			public void onCallback(DirectionsResult result, DirectionsStatus status) {
 				if (status == DirectionsStatus.OK) {
 			          directionsDisplay.setDirections(result);
 			        } else if (status == DirectionsStatus.INVALID_REQUEST) {
@@ -232,7 +234,7 @@ public class GMapsEJ implements EntryPoint {
 		
 		if (Window.confirm("Esta seguro de que desea borrar el punto"))
 		{
-		GoogleMap Nulo=null;
+			MapWidget Nulo=null;
 		Marked.setMap(Nulo);
 		L.removeItem(Selecctioado);
 		listaMarked.remove(Selecctioado);
