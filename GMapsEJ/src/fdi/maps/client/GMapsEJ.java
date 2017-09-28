@@ -1,12 +1,12 @@
 package fdi.maps.client;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JsArray;
-import com.google.gwt.core.client.JsArrayString;
-import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -15,13 +15,6 @@ import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
-import com.google.maps.gwt.client.DirectionsRenderer;
-import com.google.maps.gwt.client.DirectionsRendererOptions;
-import com.google.maps.gwt.client.DirectionsRequest;
-import com.google.maps.gwt.client.DirectionsResult;
-import com.google.maps.gwt.client.DirectionsService;
-import com.google.maps.gwt.client.DirectionsStatus;
-import com.google.maps.gwt.client.DirectionsWaypoint;
 import com.google.maps.gwt.client.Geocoder;
 import com.google.maps.gwt.client.GeocoderRequest;
 import com.google.maps.gwt.client.GeocoderResult;
@@ -29,19 +22,21 @@ import com.google.maps.gwt.client.GeocoderStatus;
 import com.google.maps.gwt.client.GoogleMap;
 import com.google.maps.gwt.client.GoogleMap.DblClickHandler;
 import com.google.maps.gwt.client.LatLng;
+import com.google.maps.gwt.client.MVCArray;
 import com.google.maps.gwt.client.MapOptions;
 import com.google.maps.gwt.client.MapTypeId;
 import com.google.maps.gwt.client.Marker;
+import com.google.maps.gwt.client.MarkerImage;
 //import com.google.maps.gwt.client.MarkerImage;
 import com.google.maps.gwt.client.MarkerOptions;
 import com.google.maps.gwt.client.MouseEvent;
-import com.google.maps.gwt.client.TravelMode;
+import com.google.maps.gwt.client.Polyline;
+import com.google.maps.gwt.client.PolylineOptions;
 import com.google.maps.gwt.client.places.Autocomplete;
 import com.google.maps.gwt.client.places.Autocomplete.PlaceChangedHandler;
 import com.google.maps.gwt.client.places.AutocompleteOptions;
 import com.google.maps.gwt.client.places.PlaceGeometry;
 import com.google.maps.gwt.client.places.PlaceResult;
-
 
 public class GMapsEJ implements EntryPoint {
 	private ListBox L;
@@ -181,6 +176,60 @@ public class GMapsEJ implements EntryPoint {
         
         
         
+
+        
+        List<LatLng> coordinatesArray= new ArrayList<LatLng>();
+        
+        coordinatesArray.add(LatLng.create(40.4169,-3.7033));
+        coordinatesArray.add(LatLng.create(39.8676536,-4.0098788));
+        coordinatesArray.add(LatLng.create(38.9554156,-3.9809874));
+        coordinatesArray.add(LatLng.create(37.8550964,-4.7086738));
+        
+        
+        int cc=1;
+        for (int i = 0; i < coordinatesArray.size(); i++) {        	 
+			LatLng lng=coordinatesArray.get(i);
+			MarkerOptions mOptsT = MarkerOptions.create();
+			 mOptsT.setPosition(lng);
+			if (i==0)
+				 mOptsT.setIcon(MarkerImage.create("IconoRojo.png"));
+			else
+				if (i==coordinatesArray.size()-1)
+					 mOptsT.setIcon(MarkerImage.create("IconoAzul.png"));
+				else
+					 mOptsT.setIcon(MarkerImage.create("IconoAmarillo.png"));
+			  Marker marker2 = Marker.create(mOptsT);
+		        marker2.setTitle(Integer.toString(cc));
+		        cc++;
+		        
+		        marker2.setMap(gMap2);
+			
+		}
+//        for (LatLng lng : coordinatesArray) {  
+//        MarkerOptions mOptsT = MarkerOptions.create();
+//        mOptsT.setPosition(lng);
+//        mOptsT.setIcon(MarkerImage.create("IconoRojo.png"));
+//        
+//        Marker marker2 = Marker.create(mOptsT);
+//        marker2.setTitle(Integer.toString(cc));
+//        cc++;
+//        
+//        marker2.setMap(gMap2);
+//        }
+        
+        MVCArray<LatLng> latLngArray = MVCArray.create();  
+        for (LatLng lng : coordinatesArray) {  
+            latLngArray.push(lng);  
+        }  
+        PolylineOptions polyOpts = PolylineOptions.create();  
+        polyOpts.setPath(latLngArray);  
+        polyOpts.setStrokeColor("red");  
+        polyOpts.setStrokeOpacity(0.5);  
+        polyOpts.setStrokeWeight(5);  
+        Polyline path = Polyline.create(polyOpts);  
+        path.setMap(gMap2);
+        
+        /*
         DirectionsRendererOptions options2 = DirectionsRendererOptions.create();
         final DirectionsRenderer directionsDisplay = DirectionsRenderer.create(options2);
         directionsDisplay.setMap(gMap2);
@@ -233,9 +282,10 @@ public class GMapsEJ implements EntryPoint {
 				
 			}
 		});
-  
+  */
         
 	}
+
 
 	protected void setPoint(LatLng latLng) {
 		GeocoderRequest GReq = GeocoderRequest.create();
