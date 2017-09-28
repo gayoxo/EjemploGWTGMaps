@@ -3,13 +3,18 @@ package fdi.maps.client;
 import java.util.LinkedList;
 
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JsArray;
+import com.google.gwt.core.client.JsArrayString;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.InputElement;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FormPanel;
 import com.google.gwt.user.client.ui.ListBox;
 import com.google.gwt.user.client.ui.RootPanel;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.maps.gwt.client.DirectionsRenderer;
 import com.google.maps.gwt.client.DirectionsRendererOptions;
 import com.google.maps.gwt.client.DirectionsRequest;
@@ -31,6 +36,11 @@ import com.google.maps.gwt.client.Marker;
 import com.google.maps.gwt.client.MarkerOptions;
 import com.google.maps.gwt.client.MouseEvent;
 import com.google.maps.gwt.client.TravelMode;
+import com.google.maps.gwt.client.places.Autocomplete;
+import com.google.maps.gwt.client.places.Autocomplete.PlaceChangedHandler;
+import com.google.maps.gwt.client.places.AutocompleteOptions;
+import com.google.maps.gwt.client.places.PlaceGeometry;
+import com.google.maps.gwt.client.places.PlaceResult;
 
 
 public class GMapsEJ implements EntryPoint {
@@ -38,8 +48,14 @@ public class GMapsEJ implements EntryPoint {
 	LinkedList<Marker> listaMarked;
 	private Geocoder fCoder;
 	private GoogleMap gMap;
+	private Autocomplete autoComplete;
 
 	public void onModuleLoad() {
+		
+		TextBox textea = new TextBox();
+		textea.setWidth("90%");
+		RootPanel.get("centered").add(textea);
+		
 		listaMarked=new LinkedList<>();
 		FormPanel panel = new FormPanel();
         panel.setWidth("100%");
@@ -68,44 +84,8 @@ public class GMapsEJ implements EntryPoint {
 //				Window.alert(event.getLatLng().toString());
 //		        MarkerImage markerImage = MarkerImage.create();
 				
-				GeocoderRequest GReq = GeocoderRequest.create();
-				GReq.setLocation(event.getLatLng());
-				fCoder.geocode(GReq, new Geocoder.Callback() {
-					
-					
-					
-					private Marker marker;
-					private int Position;
+				setPoint(event.getLatLng());
 
-					@Override
-					public void handle(JsArray<GeocoderResult> a, GeocoderStatus b) {
-						GeocoderResult result = a.shift();
-//						Window.alert(result.getFormattedAddress());
-						 MarkerOptions mOpts = MarkerOptions.create();
-//					        mOpts.setIcon(markerImage);
-					        mOpts.setPosition(result.getGeometry().getLocation());
-					        
-					        marker = Marker.create(mOpts);
-					        marker.setTitle(result.getFormattedAddress());
-					        marker.setMap(gMap);
-					        
-					        listaMarked.add(marker);
-					        L.addItem(result.getFormattedAddress());
-					        Position=L.getItemCount()-1;
-					        marker.addDblClickListener(new Marker.DblClickHandler() {
-								
-								@Override
-								public void handle(MouseEvent event) {
-									
-									BorrarPunto(marker,Position);
-
-								}
-							});
-					}
-				});
-				
-				
-		       
 				
 			}
 		});
@@ -145,12 +125,41 @@ public class GMapsEJ implements EntryPoint {
 		});
         
         
-        
-        
-        
-        
-        
         RootPanel.get("centered").add(L);
+        
+        
+        InputElement element = InputElement.as(textea.getElement());
+        
+        
+
+        
+        
+        AutocompleteOptions options5 = AutocompleteOptions.create();
+        
+//		options5.setTypes(types);
+        options5.setBounds(gMap.getBounds());
+        
+        autoComplete = Autocomplete.create(element, options5);
+
+        autoComplete.addPlaceChangedListener(new PlaceChangedHandler() {
+
+
+		@Override
+		public void handle() {
+			  PlaceResult result = autoComplete.getPlace();
+
+	            PlaceGeometry geomtry = result.getGeometry();
+	            LatLng center = geomtry.getLocation();
+
+	            gMap.panTo(center);
+	            setPoint(center);
+	            // mapWidget.setZoom(8);
+
+	            GWT.log("place changed center=" + center);
+			
+		}
+        });
+        
         
         
         FormPanel panel2 = new FormPanel();
@@ -226,6 +235,45 @@ public class GMapsEJ implements EntryPoint {
 		});
   
         
+	}
+
+	protected void setPoint(LatLng latLng) {
+		GeocoderRequest GReq = GeocoderRequest.create();
+		GReq.setLocation(latLng);
+		fCoder.geocode(GReq, new Geocoder.Callback() {
+			
+			
+			
+			private Marker marker;
+			private int Position;
+
+			@Override
+			public void handle(JsArray<GeocoderResult> a, GeocoderStatus b) {
+				GeocoderResult result = a.shift();
+//				Window.alert(result.getFormattedAddress());
+				 MarkerOptions mOpts = MarkerOptions.create();
+//			        mOpts.setIcon(markerImage);
+			        mOpts.setPosition(result.getGeometry().getLocation());
+			        
+			        marker = Marker.create(mOpts);
+			        marker.setTitle(result.getFormattedAddress());
+			        marker.setMap(gMap);
+			        
+			        listaMarked.add(marker);
+			        L.addItem(result.getFormattedAddress());
+			        Position=L.getItemCount()-1;
+			        marker.addDblClickListener(new Marker.DblClickHandler() {
+						
+						@Override
+						public void handle(MouseEvent event) {
+							
+							BorrarPunto(marker,Position);
+
+						}
+					});
+			}
+		});
+		
 	}
 
 	protected void BorrarPunto(Marker Marked, int Selecctioado) {
