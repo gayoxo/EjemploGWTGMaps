@@ -125,10 +125,6 @@ public class GMapsEJ implements EntryPoint {
         
         InputElement element = InputElement.as(textea.getElement());
         
-        
-
-        
-        
         AutocompleteOptions options5 = AutocompleteOptions.create();
         
 //		options5.setTypes(types);
