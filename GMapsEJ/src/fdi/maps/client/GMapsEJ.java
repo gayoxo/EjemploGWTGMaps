@@ -132,6 +132,7 @@ public class GMapsEJ implements EntryPoint {
         
         autoComplete = Autocomplete.create(element, options5);
 
+        
         autoComplete.addPlaceChangedListener(new PlaceChangedHandler() {
 
 
